@@ -1,0 +1,22 @@
+{
+  "name": "easeljs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "webpack --watch --config webpack.config.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^8.0.17",
+    "ts-loader": "^2.3.2"
+  },
+  "dependencies": {
+    "@types/createjs": "0.0.29",
+    "createjs-easeljs": "^0.8.2",
+    "rxjs": "^5.4.2",
+    "typescript": "^2.4.2"
+  }
+}

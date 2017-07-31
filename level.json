@@ -1,0 +1,12 @@
+{
+  "size": [500, 500],
+  "runways": [
+    {"x": 200, "y": 200, "length": 100, "heading": 90},
+    {"x": 100, "y": 100, "length": 50, "heading": 90}
+  ],
+  "entry_points": [
+    {"x": 50, "y": 0, "heading": 180}
+  ],
+  "amount": 1,
+  "background": "img/grass.jpg"
+}
