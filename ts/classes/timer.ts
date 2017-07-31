@@ -17,7 +17,7 @@ export class Timer {
         this.max_time = 0;
         this.ticks = 0;
         this.listeners = [];
-        Ticker.addEventListener("tick", this.tick);
+        Ticker.addEventListener("tick", () => this.tick());
     }
 
     add_listener(time: number) {

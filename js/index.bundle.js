@@ -620,11 +620,40 @@ exports.isFunction = isFunction;
 "use strict";
 var Shape = createjs.Shape;
 class Airplane {
-    constructor(x, y) {
+    constructor(x, y, heading, speed) {
         this.x = x;
         this.y = y;
+        this.heading = heading;
+        this.speed = speed;
+        this.tgt_heading = this.heading;
         this.shape = new Shape();
         this.shape.graphics.beginFill("red").drawCircle(this.x, this.y, 5);
+    }
+    set_pos(x, y) {
+        //console.log("Move to " + x + " - " + y);
+        this.shape.setTransform(x, y);
+        this.x = x;
+        this.y = y;
+    }
+    tick() {
+        if (this.heading > this.tgt_heading) {
+            this.heading--;
+        }
+        else if (this.heading < this.tgt_heading) {
+            this.heading++;
+        }
+        if (this.speed > this.tgt_speed) {
+            this.speed--;
+        }
+        else if (this.speed < this.tgt_speed) {
+            this.speed++;
+        }
+        function to_deg(angle) {
+            return angle * (Math.PI / 180);
+        }
+        let x = this.x - (Math.sin(to_deg(this.heading)) * (this.speed / 100));
+        let y = this.y - (Math.cos(to_deg(this.heading)) * (this.speed / 100));
+        this.set_pos(x, y);
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Airplane;
@@ -640,10 +669,12 @@ class Airplane {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_rxjs_Subject___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_rxjs_Subject__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__runway__ = __webpack_require__(21);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__airplane__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__timer__ = __webpack_require__(23);
 
 
 var Stage = createjs.Stage;
 var LoadQueue = createjs.LoadQueue;
+
 
 class Level {
     constructor(canvas) {
@@ -688,12 +719,28 @@ class Level {
             this.stage.addChild(rwy.shape);
             this.stage.addChild(rwy.debug);
         }
+        __WEBPACK_IMPORTED_MODULE_3__timer__["a" /* Timer */].Instance.add_listener(1).subscribe(() => {
+            this.tick();
+        });
+        __WEBPACK_IMPORTED_MODULE_3__timer__["a" /* Timer */].Instance.add_listener(100).subscribe(() => {
+            this.add_plane();
+        });
         this.stage.update();
     }
     add_plane() {
+        console.log("Add plane");
         let index = Math.floor(Math.random() * this.data.entry_points.length);
         let entry = this.data.entry_points[index];
-        this.airplanes.push(new __WEBPACK_IMPORTED_MODULE_2__airplane__["a" /* Airplane */](entry.x, entry.y));
+        let airplane = new __WEBPACK_IMPORTED_MODULE_2__airplane__["a" /* Airplane */](entry.x, entry.y, entry.heading, 100);
+        this.stage.addChild(airplane.shape);
+        this.airplanes.push(airplane);
+    }
+    tick() {
+        console.log(this.airplanes.length);
+        for (let airplane of this.airplanes) {
+            airplane.tick();
+        }
+        this.stage.update();
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Level;
@@ -1416,6 +1463,57 @@ window.onload = function () {
         let level = new __WEBPACK_IMPORTED_MODULE_0__classes_level__["a" /* Level */](canvas);
     }
 };
+
+
+/***/ }),
+/* 23 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_rxjs_Subject__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_rxjs_Subject___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_rxjs_Subject__);
+var Ticker = createjs.Ticker;
+
+class Timer {
+    static get Instance() {
+        return this._instance || (this._instance = new this());
+    }
+    constructor() {
+        this.max_time = 0;
+        this.ticks = 0;
+        this.listeners = [];
+        Ticker.addEventListener("tick", () => this.tick());
+    }
+    add_listener(time) {
+        if (time > this.max_time) {
+            this.max_time = time;
+        }
+        let obj = new Listener(time, new __WEBPACK_IMPORTED_MODULE_0_rxjs_Subject__["Subject"]());
+        this.listeners.push(obj);
+        return obj.subject.asObservable();
+    }
+    tick() {
+        for (let listener of this.listeners) {
+            if (this.ticks % listener.time == 0) {
+                listener.subject.next();
+            }
+        }
+        if (this.ticks == this.max_time) {
+            this.ticks = 0;
+        }
+        else {
+            this.ticks++;
+        }
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Timer;
+
+class Listener {
+    constructor(time, subject) {
+        this.time = time;
+        this.subject = subject;
+    }
+}
 
 
 /***/ })

@@ -5,6 +5,7 @@ import Stage = createjs.Stage;
 import LoadQueue = createjs.LoadQueue;
 import Bitmap = createjs.Bitmap;
 import { Airplane } from "./airplane";
+import { Timer } from "./timer";
 
 export class Level {
     data: any;
@@ -69,13 +70,33 @@ export class Level {
             this.stage.addChild(rwy.debug);
         }
 
+        Timer.Instance.add_listener(1).subscribe(() => {
+            this.tick();
+        });
+
+        Timer.Instance.add_listener(100).subscribe(() => {
+            this.add_plane();
+        });
+
+
         this.stage.update();
     }
 
     add_plane() {
+        console.log("Add plane");
         let index = Math.floor(Math.random() * this.data.entry_points.length);
         let entry = this.data.entry_points[index];
+        let airplane = new Airplane(entry.x, entry.y, entry.heading, 100);
+        this.stage.addChild(airplane.shape);
 
-        this.airplanes.push(new Airplane(entry.x, entry.y));
+        this.airplanes.push(airplane);
+    }
+
+    tick() {
+        console.log(this.airplanes.length);
+        for (let airplane of this.airplanes) {
+            airplane.tick();
+        }
+        this.stage.update();
     }
 }
